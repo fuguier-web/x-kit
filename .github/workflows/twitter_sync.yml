@@ -23,10 +23,10 @@ jobs:
     - name: 3. 安装第三方通用依赖
       run: |
         pip install --upgrade pip
-        # 直接安装推特抓取和网络请求所需的通用基础库
-        pip install httpx pydantic requests
-        # 如果项目里有 requirements.txt，顺便安装一下
+        # 🌟 加上原作者所需的 beautifulsoup4 依赖库，彻底解决无 bs4 模块的报错
+        pip install httpx pydantic requests beautifulsoup4
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
 
     - name: 4. 运行抓取脚本
       env:

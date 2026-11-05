@@ -32,23 +32,42 @@ jobs:
         X_CT0: ${{ secrets.X_CT0 }}
         PYTHONPATH: .
       run: |
-        # 1. 🌟 修复之前的笔误热补丁：把代码里的访问首页真正替换为绕过搜索页
+        # A. 恢复最完整的配置母本，解决 KeyError: 'api' 错误
+        cp config/settings.example.json config/settings.json
+
+        # B. 将你的真密码安全替换进配置文件
+        python -c "
+        import json
+        with open('config/settings.json', 'r') as f:
+            data = json.load(f)
+        data['auth']['auth_token'] = '$X_AUTH_TOKEN'
+        data['auth']['ct0'] = '$X_CT0'
+        with open('config/settings.json', 'w') as f:
+            json.dump(data, f, indent=4)
+        "
+
+        # C. 🌟 真正的热补丁修复（纠正以前的笔误）：
+        # 将原作者请求 'https://x.com' 的代码，替换为当前唯一能获取加密特征的高级搜索页面 'https://x.com'
         python -c "
         import os
         target_file = 'utils/transaction_id.py'
         if os.path.exists(target_file):
             with open(target_file, 'r', encoding='utf-8') as f:
                 content = f.read()
-            # 真正将其替换为带有参数的高级搜索路由页面
-            fixed_content = content.replace('https://x.com', 'https://x.com')
-            fixed_content = fixed_content.replace('https://twitter.com', 'https://x.com')
+            
+            # 精准执行字符串替换（不再写错新旧网址）
+            fixed_content = content.replace(\"url = 'https://x.com'\", \"url = 'https://x.com'\")
+            fixed_content = fixed_content.replace(\"url = 'https://twitter.com'\", \"url = 'https://x.com'\")
+            
             with open(target_file, 'w', encoding='utf-8') as f:
                 f.write(fixed_content)
-            print('【热补丁】已成功将报错首页纠正为高级搜索绕过页面！')
+            print('【完美热补丁】已成功将报错首页纠正为高级搜索绕过页面！')
+        else:
+            print('【错误】未找到对应文件！')
         "
 
-        # 2. 🌟 终极运行方案：使用原作者官方推荐的运行时直接传参登录模式，防止配置文件未生效
-        python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05 --auth-token \"$X_AUTH_TOKEN\" --ct0 \"$X_CT0\"
+        # D. 运行抓取（固定日期测试流）
+        python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05
 
     - name: 5. 自动同步数据回仓库
       run: |

@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-scraper:
-    runs-with: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 

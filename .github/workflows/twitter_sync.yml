@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-scraper:
-    runs-with: ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:         # 🌟 这一行直接赋予机器人写入权限，彻底解决之前找不到 Workflow permissions 的问题！
       contents: write
 

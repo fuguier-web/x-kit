@@ -33,11 +33,24 @@ jobs:
         X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
         X_CT0: ${{ secrets.X_CT0 }}
       run: |
-        sed -i "s/TOKEN_PLACEHOLDER/$X_AUTH_TOKEN/g" config/settings.json
-        sed -i "s/CT0_PLACEHOLDER/$X_CT0/g" config/settings.json
-
-        # 🌟 指定时间区间抓取：抓取 nasa 在 2026年11月3日 到 2026年11月5日 期间的所有推文
+        # 1. 🌟 直接复制原作者最完整的配置模板，确保绝对不缺任何 api 或配置参数
+        cp config/settings.example.json config/settings.json
+        
+        # 2. 🌟 强制将模板里的占位符或空白行直接替换成你在保险箱里存的真密码
+        # 使用 python 脚本来精准修改 json，防止 sed 命令因为特殊字符报错
+        python -c "
+        import json
+        with open('config/settings.json', 'r') as f:
+            data = json.load(f)
+        data['auth']['auth_token'] = '$X_AUTH_TOKEN'
+        data['auth']['ct0'] = '$X_CT0'
+        with open('config/settings.json', 'w') as f:
+            json.dump(data, f, indent=4)
+        "
+        
+        # 3. 运行抓取
         python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05
+
 
 
     - name: 5. 自动同步数据回仓库

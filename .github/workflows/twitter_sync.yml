@@ -21,12 +21,13 @@ jobs:
         python-version: '3.12'  # 🌟 核心修复：升级到 3.12 以完美兼容作者内置的二进制解密包
 
 
-    - name: 3. 安装第三方基础依赖
+    - name: 3. 安装第三方通用依赖
       run: |
         pip install --upgrade pip
-        # 只安装官方市场上一定存在的标准开源库
-        pip install httpx pydantic requests beautifulsoup4
+        # 🌟 修复：使用官方市场上登记的正确名字 xclienttransaction 进行精准下载
+        pip install httpx pydantic requests beautifulsoup4 xclienttransaction
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
 
     - name: 4. 运行抓取脚本
       env:

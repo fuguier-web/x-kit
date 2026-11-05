@@ -23,10 +23,10 @@ jobs:
     - name: 3. 安装项目依赖 (x-kit)
       run: |
         pip install --upgrade pip
-        # 直接安装原作者的这个库
-        pip install git+https://github.com
-        # 如果项目目录下有 requirements.txt 则额外安装，没有就跳过
+        # 🌟 重点：点号 (.) 代表直接在本地安装当前仓库里的原作者代码，不再依赖外部网络克隆
+        pip install -e .
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
 
     - name: 4. 运行抓取脚本
       env:

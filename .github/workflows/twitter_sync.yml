@@ -8,7 +8,7 @@ on:
 jobs:
   run-scraper:
     runs-on: ubuntu-latest
-    permissions:         # 🌟 这一行直接赋予机器人写入权限，彻底解决之前找不到 Workflow permissions 的问题！
+    permissions:
       contents: write
 
     steps:
@@ -20,27 +20,31 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: 3. 安装项目依赖 (x-kit)
+    - name: 3. 安装第三方通用依赖
       run: |
         pip install --upgrade pip
-        # 🌟 重点：点号 (.) 代表直接在本地安装当前仓库里的原作者代码，不再依赖外部网络克隆
-        pip install -e .
+        # 直接安装推特抓取和网络请求所需的通用基础库
+        pip install httpx pydantic requests
+        # 如果项目里有 requirements.txt，顺便安装一下
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
 
     - name: 4. 运行抓取脚本
       env:
         X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
         X_CT0: ${{ secrets.X_CT0 }}
       run: |
-        # 优先运行你留在仓库根目录下的自定义脚本，如果不存在则运行 main.py
-        if [ -f run_scraper.py ]; then
-          python run_scraper.py
-        elif [ -f main.py ]; then
+        # 绕过打包，直接用 python 启动原作者的脚本。
+        # 我们来看看原作者提供了哪个主入口，按顺序尝试运行：
+        if [ -f main.py ]; then
           python main.py
+        elif [ -f run.py ]; then
+          python run.py
+        elif [ -f run_scraper.py ]; then
+          python run_scraper.py
         else
-          echo "未找到运行脚本，尝试执行模块测试..."
-          python -c "import x_kit; print('x-kit 安装成功')"
+          echo "未找到任何标准启动脚本，尝试列出当前目录文件："
+          ls -R
+          exit 1
         fi
 
     - name: 5. 自动同步数据回仓库

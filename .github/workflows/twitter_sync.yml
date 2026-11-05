@@ -28,30 +28,39 @@ jobs:
         pip install httpx pydantic requests beautifulsoup4 xclienttransaction
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-
     - name: 4. 运行抓取脚本
       env:
         X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
         X_CT0: ${{ secrets.X_CT0 }}
-        # 让 Python 自动扫描本地所有文件夹，彻底解决找不到本地加密包的问题
         PYTHONPATH: .
       run: |
-        # 1. 复制原作者最完整的配置模板
+        # 1. 复制原作者的配置模板
         cp config/settings.example.json config/settings.json
 
-        # 2. 将你的真密码安全替换进去
+        # 2. 将你的真密码安全替换进去，并🌟关闭报错的交易ID注入功能（启用免密降级抓取）
         python -c "
         import json
         with open('config/settings.json', 'r') as f:
             data = json.load(f)
+        
+        # 写入密码凭证
         data['auth']['auth_token'] = '$X_AUTH_TOKEN'
         data['auth']['ct0'] = '$X_CT0'
+        
+        # 🌟 核心修复：强行关闭作者因推特改版而报错的加密头功能，转为常规 Cookie 抓取
+        if 'api' in data:
+            data['api']['inject_transaction_id'] = False
+        else:
+            data['api'] = {'inject_transaction_id': False}
+            
         with open('config/settings.json', 'w') as f:
             json.dump(data, f, indent=4)
         "
 
-        # 3. 运行抓取（固定日期测试流）
+        # 3. 运行抓取
         python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05
+
+    
 
     - name: 5. 自动同步数据回仓库
       run: |

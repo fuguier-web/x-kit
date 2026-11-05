@@ -1,0 +1,42 @@
+name: Twitter Auto Sync
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天北京时间早上 8:00 自动运行
+  workflow_dispatch:     # 允许你手动点击按钮随时运行
+
+jobs:
+  run-scraper:
+    runs-with: ubuntu-latest
+    permissions:         # 🌟 这一行直接赋予机器人写入权限，彻底解决之前找不到 Workflow permissions 的问题！
+      contents: write
+
+    steps:
+    - name: 1. 下载仓库代码
+      uses: actions/checkout@v4
+
+    - name: 2. 安装 Python 环境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 3. 安装项目依赖
+      run: |
+        pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install git+https://github.com; fi
+
+    - name: 4. 运行抓取脚本
+      env:
+        X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
+        X_CT0: ${{ secrets.X_CT0 }}
+      run: |
+        # 尝试寻找项目中的运行入口，如果原作者有主程序则运行主程序，否则运行我们刚才说的自定义脚本
+        if [ -f main.py ]; then python main.py; elif [ -f run.py ]; then python run.py; else python run_scraper.py; fi
+
+    - name: 5. 自动同步数据回仓库
+      run: |
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add .
+        git commit -m "自动更新：抓取最新推文" || exit 0
+        git push

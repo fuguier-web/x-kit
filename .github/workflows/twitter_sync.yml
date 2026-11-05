@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-scraper:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # 🌟 已修正为完全正确的 runs-on
     permissions:
       contents: write
 
@@ -31,7 +31,7 @@ jobs:
       env:
         X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
         X_CT0: ${{ secrets.X_CT0 }}
-        # 🌟 核心修复：这一行命令会让 Python 自动扫描本地所有文件夹，彻底解决找不到本地加密包的问题！
+        # 让 Python 自动扫描本地所有文件夹，彻底解决找不到本地加密包的问题
         PYTHONPATH: .
       run: |
         # 1. 复制原作者最完整的配置模板
@@ -50,3 +50,11 @@ jobs:
 
         # 3. 运行抓取（固定日期测试流）
         python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05
+
+    - name: 5. 自动同步数据回仓库
+      run: |
+        git config --local user.email "actions@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add .
+        git commit -m "自动更新：抓取最新推文" || exit 0
+        git push

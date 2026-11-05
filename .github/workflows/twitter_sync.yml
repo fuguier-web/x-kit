@@ -20,18 +20,28 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: 3. 安装项目依赖
+    - name: 3. 安装项目依赖 (x-kit)
       run: |
         pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install git+https://github.com; fi
+        # 直接安装原作者的这个库
+        pip install git+https://github.com
+        # 如果项目目录下有 requirements.txt 则额外安装，没有就跳过
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: 4. 运行抓取脚本
       env:
         X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
         X_CT0: ${{ secrets.X_CT0 }}
       run: |
-        # 尝试寻找项目中的运行入口，如果原作者有主程序则运行主程序，否则运行我们刚才说的自定义脚本
-        if [ -f main.py ]; then python main.py; elif [ -f run.py ]; then python run.py; else python run_scraper.py; fi
+        # 优先运行你留在仓库根目录下的自定义脚本，如果不存在则运行 main.py
+        if [ -f run_scraper.py ]; then
+          python run_scraper.py
+        elif [ -f main.py ]; then
+          python main.py
+        else
+          echo "未找到运行脚本，尝试执行模块测试..."
+          python -c "import x_kit; print('x-kit 安装成功')"
+        fi
 
     - name: 5. 自动同步数据回仓库
       run: |

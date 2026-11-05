@@ -18,7 +18,8 @@ jobs:
     - name: 2. 安装 Python 环境
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.12'  # 🌟 核心修复：升级到 3.12 以完美兼容作者内置的二进制解密包
+
 
     - name: 3. 安装第三方基础依赖
       run: |

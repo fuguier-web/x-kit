@@ -1,6 +1,8 @@
 {
   "auth": {
     "auth_token": "TOKEN_PLACEHOLDER",
-    "ct0": "CT0_PLACEHOLDER"
+    "ct0": "CT0_PLACEHOLDER",
+    "bearer_token": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnwIUXJaa211f3gCwAsg96qBiY0s%3D1ZQoTEUZW4DfOFm7yd9vIvMzfSTAtjE7OU79mnREDxYoN8tJg6"
   }
 }
+

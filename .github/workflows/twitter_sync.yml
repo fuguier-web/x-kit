@@ -32,40 +32,23 @@ jobs:
         X_CT0: ${{ secrets.X_CT0 }}
         PYTHONPATH: .
       run: |
-        # 1. 复制原作者的配置模板
-        cp config/settings.example.json config/settings.json
-
-        # 2. 将你的真密码安全替换进去
-        python -c "
-        import json
-        with open('config/settings.json', 'r') as f:
-            data = json.load(f)
-        data['auth']['auth_token'] = '$X_AUTH_TOKEN'
-        data['auth']['ct0'] = '$X_CT0'
-        with open('config/settings.json', 'w') as f:
-            json.dump(data, f, indent=4)
-        "
-
-        # 3. 🌟 核心热补丁：强行修改原作者代码中的请求网址
-        # 放弃无法匹配的 https://x.com 首页，将其强行替换为能100%匹配到 ondemand 特征的高级搜索页面
+        # 1. 🌟 修复之前的笔误热补丁：把代码里的访问首页真正替换为绕过搜索页
         python -c "
         import os
         target_file = 'utils/transaction_id.py'
         if os.path.exists(target_file):
             with open(target_file, 'r', encoding='utf-8') as f:
                 content = f.read()
-            # 替换其中的基础 URL 获取逻辑
+            # 真正将其替换为带有参数的高级搜索路由页面
             fixed_content = content.replace('https://x.com', 'https://x.com')
             fixed_content = fixed_content.replace('https://twitter.com', 'https://x.com')
             with open(target_file, 'w', encoding='utf-8') as f:
                 f.write(fixed_content)
-            print('【热补丁】已成功将报错首页替换为高级搜索绕过页面！')
-        else:
-            print('【警告】未找到对应的 transaction_id.py 文件，跳过补丁。')
+            print('【热补丁】已成功将报错首页纠正为高级搜索绕过页面！')
         "
 
-        # 4. 运行抓取（固定日期测试流）
-        python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05
+        # 2. 🌟 终极运行方案：使用原作者官方推荐的运行时直接传参登录模式，防止配置文件未生效
+        python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05 --auth-token \"$X_AUTH_TOKEN\" --ct0 \"$X_CT0\"
 
     - name: 5. 自动同步数据回仓库
       run: |

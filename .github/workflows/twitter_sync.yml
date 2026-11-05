@@ -23,9 +23,10 @@ jobs:
     - name: 3. 安装第三方通用依赖
       run: |
         pip install --upgrade pip
-        # 🌟 加上原作者所需的 beautifulsoup4 依赖库，彻底解决无 bs4 模块的报错
-        pip install httpx pydantic requests beautifulsoup4
+        # 🌟 补齐 bs4 和针对推特最新加密机制的 x-client-transaction 依赖库
+        pip install httpx pydantic requests beautifulsoup4 x-client-transaction
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
 
 
     - name: 4. 运行抓取脚本

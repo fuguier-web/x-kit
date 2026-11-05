@@ -33,19 +33,12 @@ jobs:
         X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
         X_CT0: ${{ secrets.X_CT0 }}
       run: |
-        # 绕过打包，直接用 python 启动原作者的脚本。
-        # 我们来看看原作者提供了哪个主入口，按顺序尝试运行：
-        if [ -f main.py ]; then
-          python main.py
-        elif [ -f run.py ]; then
-          python run.py
-        elif [ -f run_scraper.py ]; then
-          python run_scraper.py
-        else
-          echo "未找到任何标准启动脚本，尝试列出当前目录文件："
-          ls -R
-          exit 1
-        fi
+        sed -i "s/TOKEN_PLACEHOLDER/$X_AUTH_TOKEN/g" config/settings.json
+        sed -i "s/CT0_PLACEHOLDER/$X_CT0/g" config/settings.json
+
+        # 🌟 指定时间区间抓取：抓取 nasa 在 2026年11月3日 到 2026年11月5日 期间的所有推文
+        python search.py --from fangshimin --all -o tweets.json --since 2026-11-03 --until 2026-11-05
+
 
     - name: 5. 自动同步数据回仓库
       run: |
